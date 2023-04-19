@@ -1,29 +1,34 @@
 const path = require('path');
 const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-
-// config file is only required on development mode
-if (process.env.NODE_ENV !== 'production') {
-      require('dotenv').config({ path: './config/config.env' });
-}
-
-// General Middlewares
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser);
-
-// Route Imports
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+// // Route Imports
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const globalErrorHandler = require('./controllers/errorController');
+
+// config file is only required on development mode
+if (process.env.NODE_ENV !== 'production') {
+   require('dotenv').config({ path: './config/config.env' });
+}
+const app = express();
+
+// // General Middlewares
+
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Route Middlewares
-app.use('/api/v1', userRoutes);
-app.use('/api/v1', productRoutes);
-app.use('/api/v1', orderRoutes);
-app.use('/api/v1', paymentRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/orders', orderRoutes);
+app.use('/api/v1/payments', paymentRoutes);
+
+app.use(globalErrorHandler);
 
 module.exports = app;
