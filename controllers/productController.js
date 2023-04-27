@@ -29,7 +29,6 @@ exports.getProduct = catchAsync(async (req, res, next) => {
 });
 
 exports.creatProduct = catchAsync(async (req, res, next) => {
-   console.log(req.body);
    const newProduct = await Product.create(req.body);
 
    res.status(201).json({

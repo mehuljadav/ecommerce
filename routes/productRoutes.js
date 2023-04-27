@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
 const authController = require('../controllers/authController');
-
+const imageUpload = require('../utils/imageUploader');
 router.route('/').get(productController.getProducts);
 router.route('/:id').get(productController.getProduct);
 
@@ -11,7 +11,8 @@ router
    .route('/')
    .post(
       authController.protect,
-      authController.restrictTo('admin'),
+      imageUpload.uploadImages,
+      imageUpload.resizeImage,
       productController.creatProduct
    );
 
