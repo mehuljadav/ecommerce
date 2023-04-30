@@ -1,6 +1,7 @@
 const catchAsync = require('../utils/catchAsync');
 const Product = require('../models/productModel');
 const AppError = require('../utils/appError');
+const imageUploader = require('../utils/imageUploader');
 
 exports.getProducts = catchAsync(async (req, res, next) => {
    const products = await Product.find();
@@ -19,7 +20,7 @@ exports.getProduct = catchAsync(async (req, res, next) => {
    const product = await Product.findById(req.params.id);
 
    if (!product) {
-      return next(new AppError(`Product not found with id: ${req.params.id}`, 400));
+      return next(new AppError(`Product not found with id: ${req.params.id}`, 401));
    }
 
    res.status(200).json({
@@ -29,10 +30,42 @@ exports.getProduct = catchAsync(async (req, res, next) => {
 });
 
 exports.creatProduct = catchAsync(async (req, res, next) => {
-   const newProduct = await Product.create(req.body);
+   const product = await Product.create(req.body);
+   if (!product) {
+      return next(new AppError('Product cannot be created!', 401));
+   }
 
    res.status(201).json({
       status: 'success',
-      data: { newProduct },
+      data: { product },
+   });
+});
+
+// exports.removeFilesBeforeUpdate = catchAsync(async (req, res, next) => {
+//    if (req.files) {
+//       console.log('yes there is a files');
+//       console.log('removeFilesBeforeUpdate', req.files);
+//    }
+//    console.log('removeFilesBeforeUpdate', req.files);
+//    const product = await Product.findById(req.params.id);
+//    next();
+// });
+exports.updateProduct = catchAsync(async (req, res, next) => {
+   let product = await Product.findById(req.params.id);
+   if (req.body.name) {
+      req.body.slug = `${req.body.name}`.split(' ').join('-').toLowerCase();
+   }
+
+   product = await Product.findByIdAndUpdate({ _id: req.params.id }, req.body, {
+      new: true,
+      runValidators: true,
+   });
+
+   if (!product) {
+      return next(new AppError('Product cannot be created!', 401));
+   }
+   res.status(200).json({
+      status: 'success',
+      data: { product },
    });
 });

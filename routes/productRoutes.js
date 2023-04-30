@@ -14,6 +14,17 @@ router
       imageUpload.uploadImages,
       imageUpload.resizeImage,
       productController.creatProduct
+   )
+   .get(productController.getProducts);
+
+router
+   .route('/:id')
+   .get(productController.getProduct)
+   .patch(
+      authController.protect,
+      imageUpload.uploadImages,
+      imageUpload.resizeImage,
+      productController.updateProduct
    );
 
 module.exports = router;

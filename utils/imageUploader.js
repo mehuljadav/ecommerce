@@ -17,7 +17,7 @@ const multerFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-   upload: multerStorage,
+   storage: multerStorage,
    fileFilter: multerFilter,
 });
 
@@ -27,8 +27,9 @@ exports.uploadImages = upload.fields([
 ]);
 
 exports.resizeImage = catchAsync(async (req, res, next) => {
+   if (!req.files) return next();
    if (!req.files.logo || !req.files.images) return next();
-   console.log(req.body);
+   console.log('IN', req.files);
    //1) logo - single image
    req.body.brand.logo = `${req.body.brand.name}-logo.jpeg`;
 
@@ -40,7 +41,7 @@ exports.resizeImage = catchAsync(async (req, res, next) => {
 
    // 2) images
    req.body.images = [];
-
+   console.log('yes there is a image');
    await Promise.all(
       req.files.images.map(async (file, i) => {
          const slugForFile = `${req.body.name}`.split(' ').join('-').toLowerCase();
@@ -53,6 +54,7 @@ exports.resizeImage = catchAsync(async (req, res, next) => {
             .toFile(`public/images/product/${fileName}`);
 
          req.body.images.push(fileName);
+         console.log('yes there is a image and pushed it');
       })
    );
    next();
