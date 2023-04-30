@@ -1,12 +1,22 @@
 const catchAsync = require('../utils/catchAsync');
 const Product = require('../models/productModel');
 const AppError = require('../utils/appError');
-const imageUploader = require('../utils/imageUploader');
+const APIFeatures = require('../utils/apiFeatures');
 
 exports.getProducts = catchAsync(async (req, res, next) => {
-   const products = await Product.find();
+   let filter = {};
+   if (req.params.tourId) filter = { tour: req.params.tourId };
+
+   const features = new APIFeatures(Product.find(filter), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+   // const doc = await features.query.explain();
+   const products = await features.query;
+
    if (!products) {
-      return next(new AppError('Product not found', 404));
+      return next(new AppError('No products found!', 404));
    }
 
    res.status(200).json({
