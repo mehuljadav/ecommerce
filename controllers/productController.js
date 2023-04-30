@@ -6,7 +6,7 @@ const imageUploader = require('../utils/imageUploader');
 exports.getProducts = catchAsync(async (req, res, next) => {
    const products = await Product.find();
    if (!products) {
-      return next(new AppError('Product not found', 400));
+      return next(new AppError('Product not found', 404));
    }
 
    res.status(200).json({
@@ -20,7 +20,7 @@ exports.getProduct = catchAsync(async (req, res, next) => {
    const product = await Product.findById(req.params.id);
 
    if (!product) {
-      return next(new AppError(`Product not found with id: ${req.params.id}`, 401));
+      return next(new AppError(`Product not found with id: ${req.params.id}`, 404));
    }
 
    res.status(200).json({
@@ -62,10 +62,21 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
    });
 
    if (!product) {
-      return next(new AppError('Product cannot be created!', 401));
+      return next(new AppError('Product cannot be created!', 404));
    }
    res.status(200).json({
       status: 'success',
       data: { product },
+   });
+});
+
+exports.deleteProduct = catchAsync(async (req, res, next) => {
+   const product = await Product.findByIdAndDelete(req.params.id);
+   if (!product) {
+      return next(new AppError('Product not found!', 404));
+   }
+   res.status(200).json({
+      status: 'success',
+      message: 'Product deleted successfully',
    });
 });

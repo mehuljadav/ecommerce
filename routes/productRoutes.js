@@ -25,6 +25,7 @@ router
       imageUpload.uploadImages,
       imageUpload.resizeImage,
       productController.updateProduct
-   );
+   )
+   .delete(imageUpload.deleteImage, productController.deleteProduct);
 
 module.exports = router;

@@ -1,15 +1,15 @@
+const fs = require('fs');
 const multer = require('multer');
 const sharp = require('sharp');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const Product = require('../models/productModel');
 
 // Memory storage instead of diskStorage, will store in buffer
 const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
-   console.log(file.mimetype);
    if (file.mimetype.startsWith('image')) {
-      console.log('here');
       cb(null, true);
    } else {
       cb(new AppError('Not an image, upload image only!', 400), false);
@@ -29,7 +29,7 @@ exports.uploadImages = upload.fields([
 exports.resizeImage = catchAsync(async (req, res, next) => {
    if (!req.files) return next();
    if (!req.files.logo || !req.files.images) return next();
-   console.log('IN', req.files);
+
    //1) logo - single image
    req.body.brand.logo = `${req.body.brand.name}-logo.jpeg`;
 
@@ -41,7 +41,7 @@ exports.resizeImage = catchAsync(async (req, res, next) => {
 
    // 2) images
    req.body.images = [];
-   console.log('yes there is a image');
+
    await Promise.all(
       req.files.images.map(async (file, i) => {
          const slugForFile = `${req.body.name}`.split(' ').join('-').toLowerCase();
@@ -54,8 +54,30 @@ exports.resizeImage = catchAsync(async (req, res, next) => {
             .toFile(`public/images/product/${fileName}`);
 
          req.body.images.push(fileName);
-         console.log('yes there is a image and pushed it');
       })
    );
+   next();
+});
+
+exports.deleteImage = catchAsync(async (req, res, next) => {
+   console.log('here');
+   const product = await Product.findById(req.params.id);
+   if (!product) {
+      return next(new AppError('Product not found!', 404));
+   }
+   console.log(product);
+   if (product.brand.logo) {
+      fs.unlink(`public/images/brand_logos/${product.brand.logo}`, (err) => {
+         if (err) console.log(err);
+      });
+   }
+
+   if (product.images) {
+      product.images.forEach((image) => {
+         fs.unlink(`public/images/product/${image}`, (err) => {
+            if (err) console.log(err);
+         });
+      });
+   }
    next();
 });
