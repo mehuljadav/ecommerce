@@ -1,4 +1,3 @@
-const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
@@ -7,7 +6,6 @@ const morgan = require('morgan');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 
 // config file is only required on development mode
@@ -26,7 +24,6 @@ app.use(cookieParser());
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/orders', orderRoutes);
-app.use('/api/v1/payments', paymentRoutes);
 
 app.use(globalErrorHandler);
 

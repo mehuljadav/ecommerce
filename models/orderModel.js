@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 
 const orderSchema = new mongoose.Schema({
    shippingInfo: {
@@ -29,14 +28,14 @@ const orderSchema = new mongoose.Schema({
             required: true,
          },
          product: {
-            type: mongoose.Schema.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: 'Product',
             required: true,
          },
       },
    ],
    user: {
-      type: mongoose.Schema.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
    },
@@ -73,4 +72,4 @@ const orderSchema = new mongoose.Schema({
    },
 });
 
-module.exports = mongoose.Model('Order', orderSchema);
+module.exports = mongoose.model('Order', orderSchema);
