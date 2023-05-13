@@ -4,16 +4,16 @@ const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
 
 exports.getProducts = catchAsync(async (req, res, next) => {
-   let filter = {};
-   if (req.params.tourId) filter = { tour: req.params.tourId };
-
-   const features = new APIFeatures(Product.find(filter), req.query)
+   console.log(req.query);
+   const features = new APIFeatures(Product.find(), req.query)
       .filter()
       .sort()
       .limitFields()
       .paginate();
-   // const doc = await features.query.explain();
-   const products = await features.query;
+
+   const products = await features.query.populate({
+      path: 'user',
+   });
 
    if (!products) {
       return next(new AppError('No products found!', 404));
@@ -27,8 +27,10 @@ exports.getProducts = catchAsync(async (req, res, next) => {
 });
 
 exports.getProduct = catchAsync(async (req, res, next) => {
-   const product = await Product.findById(req.params.id);
-
+   const product = await Product.findById(req.params.id).populate({
+      path: 'user',
+      select: 'name email gender -_id',
+   });
    if (!product) {
       return next(new AppError(`Product not found with id: ${req.params.id}`, 404));
    }
@@ -41,6 +43,11 @@ exports.getProduct = catchAsync(async (req, res, next) => {
 
 exports.creatProduct = catchAsync(async (req, res, next) => {
    const product = await Product.create(req.body);
+   // const category = await Category.findByIdAndUpdate(
+   //    { _id: req.body.category },
+   //    { $push: { products: product._id } },
+   //    { new: true, runValidators: true }
+   // );
    if (!product) {
       return next(new AppError('Product cannot be created!', 401));
    }
@@ -65,15 +72,17 @@ exports.updateProduct = catchAsync(async (req, res, next) => {
    if (req.body.name) {
       req.body.slug = `${req.body.name}`.split(' ').join('-').toLowerCase();
    }
-
+   if (!product) {
+      return next(new AppError('Product not found!', 404));
+   }
    product = await Product.findByIdAndUpdate({ _id: req.params.id }, req.body, {
       new: true,
       runValidators: true,
    });
-
    if (!product) {
-      return next(new AppError('Product cannot be created!', 404));
+      return next(new AppError('Product not updated', 404));
    }
+
    res.status(200).json({
       status: 'success',
       data: { product },

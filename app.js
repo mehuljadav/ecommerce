@@ -1,9 +1,9 @@
 const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
 const morgan = require('morgan');
-// // Route Imports
+
+// Route Imports
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -14,14 +14,13 @@ const globalErrorHandler = require('./controllers/errorController');
 if (process.env.NODE_ENV !== 'production') {
    require('dotenv').config({ path: './config/config.env' });
 }
+
 const app = express();
-
-// // General Middlewares
-
+// General Middlewares
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // Route Middlewares
 app.use('/api/v1/users', userRoutes);

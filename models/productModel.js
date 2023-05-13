@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 
 const productSchema = new mongoose.Schema(
    {
@@ -58,14 +57,14 @@ const productSchema = new mongoose.Schema(
          },
       ],
       user: {
-         type: mongoose.Schema.ObjectId,
+         type: mongoose.Schema.Types.ObjectId,
          ref: 'User',
          required: [true, 'Please enter user type, e.g user or vendor!'],
       },
       reviews: [
          {
             user: {
-               type: mongoose.Schema.ObjectId,
+               type: mongoose.Schema.Types.ObjectId,
                ref: 'User',
                required: true,
             },
@@ -94,15 +93,25 @@ const productSchema = new mongoose.Schema(
       },
    },
    {
-      versionKey: false,
+      toJSON: { virtuals: true },
+      toObject: { virtuals: true },
    }
 );
 
 // schema
 
-productSchema.pre('save', async function (next) {
+productSchema.pre('save', function (next) {
    this.slug = `${this.name}`.split(' ').join('-').toLowerCase();
    next();
+});
+
+productSchema.pre(/^find/, function (next) {
+   this.find({ isActive: { $eq: true } });
+   next();
+});
+productSchema.virtual('youSave').get(function () {
+   return this.price - this.priceDiscount;
+   console.log(this.price - this.priceDiscount);
 });
 
 module.exports = mongoose.model('Product', productSchema);
